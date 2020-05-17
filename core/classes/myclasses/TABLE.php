@@ -13,24 +13,24 @@ abstract class TABLE
     protected static $namespaces = ["Native", "Home"];
 
 
-    public $id = null;
-    public $created = null;
-    public $modified = null;
+    public $id         = null;
+    public $created    = null;
+    public $modified   = null;
+    public $protected  = NON;
+    public $deleted     = OUI;
     public $visibility = 1;
-    protected $protected = 0;
-    protected $valide = 1;
-    public static $lastId;
 
+    public $_lastId;
+    public $_sentense;
 
-    public $sentense;
 
 
     abstract public function enregistre();
-    public function uploading(Array $files){}
+
+    
 
 
     public function hydrater(Array $table1){
-
         if(isset($table1["id"]) && !empty($table1["id"])){
             $this->setId($table1["id"]);
             $this->actualise();
@@ -45,10 +45,10 @@ abstract class TABLE
     }
 
 
-    public static function encours(){
-        return static::findBy(["etat_id ="=>ETAT::ENCOURS]);
-    }
 
+
+
+    public function uploading(Array $files){}
     
     public function getProperties(){
         return get_object_vars($this);
@@ -69,6 +69,7 @@ abstract class TABLE
     }
 
 
+
     public function name(){
         if (isset($this->lastname)) {
             return $this->name." ".$this->lastname;
@@ -77,19 +78,13 @@ abstract class TABLE
         }
     }
 
-//SETTERS AND GETTERS
 
-    public function getId(){
-        return $this->id;
+    public static function encours(){
+        return static::findBy(["etat_id ="=>ETAT::ENCOURS]);
     }
 
-///////////////////////
-    public function setId($id){
-        $this->id = $id;
-        return $this;
-    }
 
-/////////////////////////////////////////////////
+
     public function getProtected(){
         return $this->protected;
     }
@@ -98,23 +93,21 @@ abstract class TABLE
         $this->protected = $protected;
         return $this;
     }
-////////////////////////////////////////////////////
-    public function get_created(){
-        return $this->created;
-    }
+
 
     public function setCreated($date = null){
         $this->created = $date;
         if ($date == null) {
-           $this->created = date("Y-m-d H:i:s");
+            $this->created = date("Y-m-d H:i:s");
         }
         return $this;
     }
-    
+
+
     public function setModified($date = null){
         $this->modified = $date;
         if ($date == null) {
-         $this->modified = date("Y-m-d H:i:s");
+            $this->modified = date("Y-m-d H:i:s");
         }
         return $this;
     }
@@ -124,7 +117,6 @@ abstract class TABLE
         $this->sentense = $texte;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //initialiser la connexion et recuperer le nom de la table
     public static function tableName(){
@@ -135,6 +127,7 @@ abstract class TABLE
     }
 
 
+    //obtenir le nom complet d'une table, avec son namespace
     public static function fullyClassName(String $classe){
         $test = false;
         foreach (TABLE::$namespaces as $key => $module) {
@@ -152,7 +145,17 @@ abstract class TABLE
     }
 
 
-    //executer manuellement une requette sur un static
+    //cloner un objet
+    public function cloner($item){
+        $objs = get_object_vars($item);
+        foreach ($objs as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+
+
+    //executer manuellement une requette sur une table
     public static function execute(String $requette, Array $params = []){
         extract(static::tableName());
         $req = $bdd->prepare($requette);
@@ -201,286 +204,218 @@ abstract class TABLE
             if ($this->modified == null) {
                 $this->setModified();
             }
-            $requette = "UPDATE $table SET $setter WHERE id=$id";
+            $requette = "UPDATE $table SET $setter WHERE id = $id";
         }else{
             $data->mode ="insert";
             //c'est un ajout (insert)
             if ($this->created == null) {
               $this->setCreated();
-            }
-            if ($this->modified == null) {
-                $this->setModified();
-            }
-            
-           
-            $requette = "INSERT INTO $table SET $setter";
+          }
+          if ($this->modified == null) {
+            $this->setModified();
         }
+
+        $requette = "INSERT INTO $table SET $setter";
+    }
         //liste des proprietes de la classe
-        $table2 = $this->getProperties();
-        $table1 = array_intersect_key($table2, $tab);
-        unset($table1["id"]);
+    $table2 = $this->getProperties();
+    $table1 = array_intersect_key($table2, $tab);
+    unset($table1["id"]);
 
-        $req = $bdd->prepare($requette);
-        foreach ($table1 as $key => $value) {
-            if (!is_array($value)) {
-                $req->bindValue(":$key", $value);
-            }else{
-                $req->bindValue(":$key", "");
-            }
-        }
-        $resultat = $req->execute();
-
-        if ($resultat) {
-            $data->status = true;
-            $data->message = "Données enregistrées avec succes !";
-            if ($data->mode == "insert") {
-                //recuperer le lastid
-                $class = self::fullyClassName($table);
-                $temp = $class::findLastId();
-                $id = $temp->getId();
-                $data->lastid = $id;
-                $this->setId($id);
-            }else{
-                $data->lastid = $this->getId();
-            }
-
-            if ($this::$tableName != self::fullyClassName("history") ) {
-                //L'historque
-                $class = self::fullyClassName($table);
-                $element = new $class();
-                $element->cloner($this);
-                HISTORY::createHistory($element, $data->mode);
-            }
+    $req = $bdd->prepare($requette);
+    foreach ($table1 as $key => $value) {
+        if (!is_array($value)) {
+            $req->bindValue(":$key", $value);
         }else{
-            $data->status = false;
-            $data->message = "Une erreur s'est produite lors du save()";
+            $req->bindValue(":$key", "");
         }
-        return $data;
     }
+    $resultat = $req->execute();
 
-
-
-    //Supprimer partiel d'un record
-    public function supprime(){
-        $data = new RESPONSE;
-        extract(static::tableName());
-        $this->actualise();
-        //on verifie si on peut vraiment le supprimé
-        if (intval($this->id) > 0 && $this->protected == 0) {
-            $req = $bdd->prepare("UPDATE $table SET valide=0 WHERE id=?");
-            $req->execute([$this->getId()]);
-            $data->status = true;
-            $data->message = "La suppression a été effectuée avec succès ! ";
-            //L'historque
-            HISTORY::createHistory($this, "delete");
+    if ($resultat) {
+        $data->status = true;
+        $data->message = "Données enregistrées avec succes !";
+        if ($data->mode == "insert") {
+            $class = self::fullyClassName($table);
+            $temp = $class::findLastId();
+            $id = $temp->getId();
+            $data->lastid = $id;
+            $this->setId($id);
         }else{
-            $data->id = 2;
-            $data->status = false;
-            $data->message = "Vous ne pouvez pas supprimer cet élément. Il est protégé !";
+            $data->lastid = $this->getId();
         }
-        return $data;
-    }
 
-
-
-    //Supprimer definitive d'un record
-    public function delete(){
-        $data = new RESPONSE;
-        extract(static::tableName());
-        $this->actualise();
-        //on verifie si on peut vraiment le supprimé
-        if (intval($this->id) > 0 && $this->protected == 0) {
-            $req = $bdd->prepare("DELETE FROM $table WHERE id=?");
-            $req->execute([$this->getId()]);
-            $data->status = true;
-            $data->message = "La suppression a été effectuée avec succès ! ";
-            //L'historque
-            HISTORY::createHistory($this, "delete");
-        }else{
-            $data->id = 2;
-            $data->status = false;
-            $data->message = "Vous ne pouvez pas supprimer cet élément. Il est protégé !";
+        if ($this::$tableName != self::fullyClassName("history") ) {
+            $class = self::fullyClassName($table);
+            $element = new $class();
+            $element->cloner($this);
+            HISTORY::createHistory($element, $data->mode);
         }
-        return $data;
+    }else{
+        $data->status = false;
+        $data->message = "Une erreur s'est produite lors du save()";
     }
-
-
-
-    //recuperer tous les records d'une table
-    public static function getAll(){
-        extract(static::tableName());
-        $req = $bdd->query("SELECT * FROM $table WHERE valide = 1 ");
-        return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");
-    }
-
-
-    //recuperer le dernier record
-    public static function findLast($champ="id", $nb=1, $order="ASC"){
-        extract(static::tableName());
-        $req = $bdd->query("SELECT * FROM $table WHERE valide = 1 ORDER BY $champ $order LIMIT $nb");
-        return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");
-    }
-
-
-    //recuperer le dernier record
-    public static function findLastId(){
-        extract(static::tableName());
-        $req = $bdd->query("SELECT * FROM $table WHERE valide = 1 ORDER BY id DESC LIMIT 1");
-        $datas = $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");
-        if (count($datas) > 0) {
-            return $datas[0];
-        }else{
-            return false;
-        }
-    }
+    return $data;
+}
 
 
 
 
-    //les fonctions "findBy" et "findLike" spour rechercher a partir de n'importe quelle colonne
-    public static function findLike(String $search, Array $proprietes=["name"], int $limit=0){
-        extract(static::tableName());
+//recuperer tous les enregistrements d'une table
+public static function getAll(){
+    extract(static::tableName());
+    $req = $bdd->query("SELECT * FROM $table WHERE deleted = 0 ");
+    return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");
+}
+
+
+//les fonctions "findBy" et "findLike" spour rechercher a partir de n'importe quelle colonne
+public static function findBy(Array $params=[], Array $group =[], Array $order = [], int $limit=0, $conn="AND"){
+    extract(static::tableName());
         //les conditions
-        $where = ""; $i = 1;
-        $j = count($proprietes);
-        foreach ($proprietes as $key => $value) {
-            if ($i == $j) {
-                $where .= "$value LIKE '%$search%'";
-            }else{
-                $where .= "$value LIKE '%$search%' OR ";
-            }
-            $i++;
-        }
-        
-        //limite
-        $lim ="";
-        if ($limit > 0) {
-            $lim ="LIMIT $limit";
-        }
-
-        $requette = "SELECT * FROM $table WHERE valide = 1 AND $where $lim";
-        $req = $bdd->prepare($requette);
-        $req->execute();
-        return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");         
+    $where = $groupe = $orders =""; $i =0;
+    foreach ($params as $key => $value) {
+        $i++;
+        $where .= "$conn $key :$i ";
     }
-
-
-
-
-
-    //les fonctions "findBy" et "findLike" spour rechercher a partir de n'importe quelle colonne
-    public static function findBy(Array $params=[], Array $group =[], Array $order = [], int $limit=0, $conn="AND"){
-        extract(static::tableName());
-        //les conditions
-        $where = $groupe = $orders =""; $i =0;
-        foreach ($params as $key => $value) {
-            $i++;
-            $where .= "$conn $key :$i ";
-        }
         //les group
+    if (count($group) > 0) {
+        $groupe ="GROUP BY ";
         if (count($group) > 0) {
-            $groupe ="GROUP BY ";
-            if (count($group) > 0) {
-                $groupe .= implode(", ", $group);
-            }
+            $groupe .= implode(", ", $group);
         }
+    }
         //les orders
-        if (count($order) > 0) {
-            $i =0;
-            $orders ="ORDER BY ";
-            foreach ($order as $key => $value) {
-                $i++;
-                if (count($order) == $i) {
-                    $orders .= "$key $value ";
-                }else{
-                    $orders .= "$key $value, ";
-                }
+    if (count($order) > 0) {
+        $i =0;
+        $orders ="ORDER BY ";
+        foreach ($order as $key => $value) {
+            $i++;
+            if (count($order) == $i) {
+                $orders .= "$key $value ";
+            }else{
+                $orders .= "$key $value, ";
             }
         }
+    }
 
         //
-        $lim ="";
-        if ($limit > 0) {
-            $lim ="LIMIT $limit";
-        }
-
-        $requette = "SELECT * FROM $table WHERE valide = 1 $where $groupe $orders $lim";
-        $req = $bdd->prepare($requette);
-        $i =0;
-        foreach ($params as $key => $value) {
-            $i++;
-            $req->bindValue(":$i", $value);
-        }
-        $req->execute();
-        return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");         
+    $lim ="";
+    if ($limit > 0) {
+        $lim ="LIMIT $limit";
     }
 
-
-
-
-    public function cloner($item){
-        $objs = get_object_vars($item);
-        foreach ($objs as $key => $value) {
-            $this->$key = $value;
-        }
+    $requette = "SELECT * FROM $table WHERE deleted = 0 $where $groupe $orders $lim";
+    $req = $bdd->prepare($requette);
+    $i =0;
+    foreach ($params as $key => $value) {
+        $i++;
+        $req->bindValue(":$i", $value);
     }
+    $req->execute();
+    return $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");         
+}
 
 
 
+//recuperer le dernier enregistrement d'une table
+public static function findLastId(){
+    extract(static::tableName());
+    $req = $bdd->query("SELECT * FROM $table WHERE deleted = 0 ORDER BY id DESC LIMIT 1");
+    $datas = $req->fetchAll(PDO::FETCH_CLASS, "$tableClass");
+    if (count($datas) > 0) {
+        return $datas[0];
+    }else{
+        return false;
+    }
+}
 
-    public function actualise(){
-        if (is_numeric($this->getId())) {
-            $datas = static::findBy(["id = "=> $this->getId()]);
-            if (count($datas) > 0) {
-                $temp = $datas[0];
-                $objs = get_object_vars($temp);
-                foreach ($objs as $key => $value) {
-                    if (strstr($key, "_id") != false) {
-                        $coupes = explode("_id",$key);
-                        $class = $coupes[0];
-                        $mot = self::fullyClassName($class);
-                        $datas = $mot::findBy(["id = "=>$value]);
-                        if (isset($coupes[1])) {
-                            $class.=$coupes[1];
-                        }
-                        if (count($datas) == 1) {
-                            $temp->$class = $datas[0];
-                            $temp->$class->actualise();
-                        }else{
-                            $temp->$class = new $mot();
-                        }
+
+
+//fourni toutes les informations d'un objet et ses affiliations
+public function actualise(){
+    if (is_numeric($this->getId())) {
+        $datas = static::findBy(["id = "=> $this->getId()]);
+        if (count($datas) > 0) {
+            $temp = $datas[0];
+            $objs = get_object_vars($temp);
+            foreach ($objs as $key => $value) {
+                if (strstr($key, "_id") != false) {
+                    $coupes = explode("_id",$key);
+                    $class = $coupes[0];
+                    $mot = self::fullyClassName($class);
+                    $datas = $mot::findBy(["id = "=>$value]);
+                    if (isset($coupes[1])) {
+                        $class.=$coupes[1];
+                    }
+                    if (count($datas) == 1) {
+                        $temp->$class = $datas[0];
+                        $temp->$class->actualise();
+                    }else{
+                        $temp->$class = new $mot();
                     }
                 }
-                $objs = get_object_vars($temp);
-                foreach ($objs as $key => $value) {
-                    $this->$key = $value;
-                }
+            }
+            $objs = get_object_vars($temp);
+            foreach ($objs as $key => $value) {
+                $this->$key = $value;
             }
         }
     }
+}
 
 
+// recuperer tous les enregistrements d'une table fille
+public function fourni($nomTable, $params = [], Array $group =[], Array $order = [], int $limit=0, $conn="AND"){
+    extract(static::tableName());
+    $this->actualise();
+    $name = strtolower($nomTable)."s";
+    $table .="_id";
+    $class =  self::fullyClassName($nomTable);
+    $array = array_merge(["$table = "=> $this->getId()], $params);
+    $datas = $class::findBy($array, $group, $order, $limit, $conn);
+    $this->$name = $this->items = $datas;
+    return $datas;
+}
 
-    public function fourni($nomTable, $params = [], Array $group =[], Array $order = [], int $limit=0, $conn="AND"){
-        extract(static::tableName());
-        $this->actualise();
-        $name = strtolower($nomTable)."s";
-        $table .="_id";
-        $class =  self::fullyClassName($nomTable);
-        $array = array_merge(["$table = "=> $this->getId()], $params);
-        $datas = $class::findBy($array, $group, $order, $limit, $conn);
-        $this->$name = $this->items = $datas;
-        return $datas;
+
+//Suppression logique d'un enregistrement dans la base de données
+public function supprime(){
+    $data = new RESPONSE;
+    extract(static::tableName());
+    $this->actualise();
+    if ($this->protected == 0) {
+        $req = $bdd->prepare("UPDATE $table SET deleted = 1 WHERE id=?");
+        $req->execute([$this->getId()]);
+        $data->status = true;
+        $data->message = "La suppression a été effectuée avec succès ! ";
+        HISTORY::createHistory($this, "delete");
+    }else{
+        $data->status = false;
+        $data->message = "Vous ne pouvez pas supprimer cet élément. Il est protégé !";
     }
+    return $data;
+}
 
 
-    public function fourni__($nomTable){
-        extract(static::tableName());
-        $this->actualise();
-        $table .="_id";
-        $class =  self::fullyClassName($nomTable);
-        $datas = $class::findBy(["$table != "=> $this->getId()]);
-        return $this->items = $datas;
+
+//Supprimer physique et definitive d'un enregistrement dans la base de données
+public function delete(){
+    $data = new RESPONSE;
+    extract(static::tableName());
+    $this->actualise();
+    if ($this->protected == 0) {
+        $req = $bdd->prepare("DELETE FROM $table WHERE id=?");
+        $req->execute([$this->getId()]);
+        $data->status = true;
+        $data->message = "La suppression a été effectuée avec succès ! ";
+        HISTORY::createHistory($this, "delete");
+    }else{
+        $data->status = false;
+        $data->message = "Vous ne pouvez pas supprimer cet élément. Il est protégé !";
     }
+    return $data;
+}
+
 }
 ?>

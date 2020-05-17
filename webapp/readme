@@ -1,0 +1,69 @@
+
+C'est dans le dossier "webapp" que toutes voas page visisbles seront.
+Toujours respectant l'architecture des 3 niveaux, chaque page doit etre placé au bon endroit pour que le framework fasse ce qu'il doit faire. (vous aidez).
+
+Pour mieux vous expliquez, prenons le cas du dévéloppement d'un site moderne de e-commerce.
+sur un site de e-commerce, vous avez plusieurs domaines (comme des sous sites): 
+-le domaines pour choisir les articles et faire les achats
+-le domaine espace client
+-le domaine back-office des boutiques (pour uploader leurs produits)
+-le domaine adminitratif de gestion des commandes et SAV
+-le domaine super administration de la plateforme, pour voir les stats et autres
+-et ouvent pleins d'autres...
+
+Tous ces domaines ont souvent des templates totalement differents les uns des autres (même s'ils gardent la même charte graphique)
+comme l'architecture des pages, l'emplacement des menus, le format des pages etc..
+
+L'architecture des 3 niveaux vous evite de vous meler les pinceaux avec tous ces dossiers et ces fichiers à n'en point finir.
+il vous apporte une rigueur , facile a respecter et qui vous garantir de toujours trouver ce que vous cherchez a tout moment et  une meilleur maintenance a l'avenir
+
+bien, comment ça se passe :
+Dans l'exemple de notre site de e-commerce, chaque fdomaine fera l'objet d'un dossier dans 'webapp'
+
+- webapp
+	- boutique
+	- espace-client 
+	- backoffice-boutique
+	- gestion-sav
+	- administration
+	-....
+
+Si on prend le domaine adminitratif de gestion des commandes et SAV, 
+IL aura son propre template independant des autres (et donc ses propres fichiers css, ses propres fichiers js, ses propres layouts de pages (header.php, footer.php, menu.php) à inclure des les autres pages).
+il y aura ce qu'on appelle des sections de domaines. ce sont 
+- section commandes (qui regroupent les pages de commandes, les pages de livraisons, de facture)
+- section caisse (qui regroupent les pages de caisse ..)
+- section sav (pages de reclamation, de traitement de plainte, etc..)
+En fait, les sections, c'est le decoupage du domaine en droit d'acces (on peut vouloir specifier les acces que chaque personne connectée aura dans un domaine, si c'est le cas, en decoupant votre site de cette maniere, vous avez fait 75% du boulot).
+La structure sera donc :
+
+- webapp
+	- boutique
+	- espace-client 
+	- backoffice-boutique
+	- gestion-sav
+		- templates
+		- sections
+			- commandes
+			- caisse
+			- sav
+	- administration
+	-....
+
+Vous aurez compris que tous les fichiers et dossiers afferant au template de votre domaine 'gestion-sav' (css, js, layouts) seront dans le dossier 'template'.
+Chaque section fera l'objet d'un dossier, lui-même dans le dossier global 'sections'..
+
+Dans chaque section, il y aura maintenant un dossier pour chaque page que vous voulez creer.
+le dossier doit contenir normalement 5 fichiers:
+
+- index.php (l'ossature de la page)
+- require.php (les traitements php specifiques de la paage en question)
+- traitement.php ou ajax.php (facultatif page php de traitement des formulaires specifiques à la paage en question)
+- style.css (facultatif, s'il y a du style special pour la page)
+- script.js (facultatif, s'il y a du script js special pour la page)
+
+
+Je vous l'accorde, ça fait beaucoup. Mais c'est pas plus que ce vous devriez faire avec un autre framework (Laravel, CakePHP, Symphony, etc...) ou normalement sans framework.
+
+La seule difference, c'est que Shamman, vous oblige à etre rigoreux, discipliné et rangé tout au long de votre developpement.
+Avec Shamman, aucun projet n'est volumineux ou gros. Si vous suivez cette architecture, la taille du projet ne comptera plus.
