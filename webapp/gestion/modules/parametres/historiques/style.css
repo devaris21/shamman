@@ -1,0 +1,19 @@
+
+.block .col-sm-6{
+	margin-bottom: 3%;
+}
+
+.rate{
+	border-radius:  100%;
+	display: inline-block;
+	padding: 25px 27px 25px;
+	background-color: rgba(250, 177, 160);
+	color: #fff;
+	font-size: 35px;
+	font-weight: bold;
+	border: 3px dotted #ddd;
+}
+
+table.table td{
+	font-style: 16px;
+}

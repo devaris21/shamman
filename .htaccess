@@ -1,0 +1,12 @@
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+#pour toutes les reqquettes, la page root
+RewriteRule ^(.+)$ /core/root/index.php?query=$1 [NC,L,NE]
+
+#s'il n'y a rien d'ecrire on redirige vers le module acceuil 
+RewriteRule ^()$ /core/root/index.php?query=gestion/access/login [NC,L,NE]
+
+

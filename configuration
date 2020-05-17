@@ -1,0 +1,70 @@
+<?php
+
+$configs =  [
+
+	// Informations concernant votre applicaton
+	"metadata" => [
+		"appname"      => "Mon application",
+		"description"  => "C'est ma premiere application avec le framework SHAMMAN",
+		"organization" => "DGIMA | Plateforme de collecte de données",
+		"email"        => "infos@shamman.com",
+		"website"      => "https://www.shamman.com"
+	],
+
+
+	//Sécurité
+	"configuration" => [
+		"twig_extension" => true,
+		"app_id"         => "878444549798948",
+		"secret_key"     => "wBIPFky1VwDmmykIRanDmx3FkcIwTc4uQ8WT4K8kz6c"
+	],
+
+
+	//Informations de la base de données
+	"database" => [
+		"driver"   => "mysql",
+		"charset"  => "utf8",
+		"host"     => "127.0.0.1",
+		"port"     => 3306,
+		"dbname"   => "bidy",
+		"login"    => "root",
+		"password" => ""
+	],
+
+
+	//Gestionnaire de mail
+	"mail" => [
+		"driver"     => "smtp",
+		"transport"  => "smtp.mailtrap.com",
+		"encryption" => "ssl",
+		"charset"    => "utf8",
+		"port"       => 465,
+		"email"      => "",
+		"password"   => "",
+		"replyto"    => "",
+	],
+
+
+	//Si voulez heberger l'application dans domaine Active Directory
+	"activedirectory" => [
+		"driver"     => "smtp",
+		"host"       => "smtp.mailtrap.com",
+		"port"       => 25,
+		"username"   => "",
+		"password"   => "",
+		"encryption" => null
+	],
+
+	
+	//Paramètres de sauvegarde
+	"Backup" => [
+		"backup"    => false,
+		"email"     => "backup@mail.com",
+		"frequence" => 7
+	]
+
+
+];
+
+
+?>

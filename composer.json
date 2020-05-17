@@ -1,0 +1,22 @@
+{
+
+	"autoload":{
+		"psr-4": {
+			"Native\\" : "core\\classes\\natives\\",
+			"Home\\" : "core\\classes\\myclasses\\"
+		}
+	},
+	
+    "name": "aristide/gpav2",
+    "description": "Version 2 de la plateforme de gestion de parc auto",
+    "authors": [
+        {
+            "name": "Aristide Manyessé",
+            "email": "aristidemanyesse@gmail.com"
+        }
+    ],
+    "require": {
+		"swiftmailer/swiftmailer": "^6.0",
+		"fzaninotto/faker": "^1.9"
+	}
+}

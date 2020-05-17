@@ -1,0 +1,27 @@
+ .cards .col-md-4, .ibox-content {
+ 	padding-bottom: 0;
+ }
+
+ .page-heading{
+ 	margin-bottom: 0;
+ 	padding: 0;
+ }
+ .contact-box{
+ 	padding: 5px;
+ 
+}
+
+ #autos ul li{
+ 	background-color: #f1f1f1;
+ 	 	margin-right: 1%;
+ }
+
+  #autos ul li a{
+color: #ccc;
+ 	padding: 7px 10px;
+ }
+
+ #autos ul li a.active{
+color: #111;
+ 	padding: 7px 10px;
+ }

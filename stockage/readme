@@ -1,0 +1,33 @@
+Le dossier 'stockage' respecte egalement le systeme de 3 niveaux
+
+C'est dans ce dossier que tous vous fichiers (images, videos, audios, documents, etc...) seront et  doivent etre stocker.
+Ils doivent l'etre dans des dossiers specifiques a leur type (Ex: un dossier pour les images, un autre pour les documents)
+puis a l'interieur de chacun des dossiers specifiques, vous pourriez creer d'autres dossiers pour les categories soit par leur fonctions ou par les nature (facultatif mais très recommendé)
+
+- stockage
+	- images
+		- slides
+		- logos
+		- icons
+	- videos 
+		- tutoriels
+		- autres
+	- documents
+		- factures
+		- pdf
+		- excel
+
+pour acceder à un fichier via une page de votre site (fichier index.php), il faut une syntaxe de ce type:
+
+$this->stockage("images", "logos", "<nom du fichier complet>");
+$this->stockage("images", "icons", "<nom du fichier complet>");
+$this->stockage("videos", "autres", "<nom du fichier comple>");
+
+pour acceder à un fichier via une page de traitement de votre site (fichier traitement.php ou ajax.php), il faut:
+-initialiser un rooter
+-puis appeler la methode statique 'stockage'
+
+$rooter = new ROOTER();
+$rooter->stockage("videos", "autres", "<nom du fichier comple>");
+
+NB: La methode 'stockage' ne retourne que le chemin (path) du fichier en question, et donc un type chaine de caractere (String)

@@ -1,0 +1,37 @@
+.ibox-content{
+	padding: 1%;
+}
+
+h2.title{
+	font-size: 35px;
+	padding: 0;
+	margin: 0;
+}
+
+h3{
+	font-weight: 500
+}
+
+.text{
+	word-spacing: 4px;
+	line-height: 29px;
+	font-size: 16px;
+	font-weight: normal;
+	text-align: justify;
+}
+
+.prix{
+	border: 3px solid navy;
+	padding: 2px 15px;
+	font-size: 23px;
+	font-weight: bold;
+	display: inline-block;
+	margin: 0;
+	margin-left: 3%;
+}
+
+.lettre{
+	font-size: 17px;
+	font-style: italic;
+	font-weight: 600;
+}

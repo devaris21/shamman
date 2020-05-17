@@ -1,0 +1,59 @@
+
+<style type="text/css">
+    body{
+        font-size: 13px;
+        font-family: "helvetica", "arial", sans-serif;
+        background: rgb(242,242,242);
+    }
+
+    p{
+        margin: 0;
+        font-weight: 400;
+        color: #666;
+        line-height: 17px;
+        text-align: justify;
+    }
+
+    table{
+        font-size: 13px;
+        min-width: 200px;
+        line-height: 18px;
+    }
+    .link{
+        text-decoration: none;
+        color: #555;
+        margin-right: 20px;
+        font-weight: bold;
+    }
+
+    span{
+        color: #777;
+        display: inline-block;
+        font-style: italic;
+        margin-bottom: 6px;
+    }
+
+    .bouton{
+        line-height: 15px;
+        display: inline-block;
+        padding-right: 15px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 15px;
+        font-weight: bold;
+        text-decoration: none;
+        color: #ffffff;
+        font-size: 13px;
+        border-radius: 30px;
+        background-color: #0094FFFF;        
+    }
+
+
+    .gras{
+        font-weight: bold;
+    }
+
+    .italic{
+        font-style: italic;
+    }
+</style>
