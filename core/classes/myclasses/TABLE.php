@@ -20,8 +20,8 @@ abstract class TABLE
     public $deleted     = OUI;
     public $visibility = 1;
 
-    public $_lastId;
-    public $_sentense;
+    public $lastId;
+    public $sentense;
 
 
 
@@ -83,16 +83,6 @@ abstract class TABLE
         return static::findBy(["etat_id ="=>ETAT::ENCOURS]);
     }
 
-
-
-    public function getProtected(){
-        return $this->protected;
-    }
-
-    public function setProtected(int $protected){
-        $this->protected = $protected;
-        return $this;
-    }
 
 
     public function setCreated($date = null){

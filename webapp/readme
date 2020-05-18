@@ -58,7 +58,7 @@ le dossier doit contenir normalement 5 fichiers:
 
 - index.php (l'ossature de la page)
 - require.php (les traitements php specifiques de la paage en question)
-- traitement.php ou ajax.php (facultatif page php de traitement des formulaires specifiques à la paage en question)
+- traitement.php ou ajax.php (facultatif, page php de traitement des formulaires specifiques à la paage en question)
 - style.css (facultatif, s'il y a du style special pour la page)
 - script.js (facultatif, s'il y a du script js special pour la page)
 
@@ -67,3 +67,5 @@ Je vous l'accorde, ça fait beaucoup. Mais c'est pas plus que ce vous devriez fa
 
 La seule difference, c'est que Shamman, vous oblige à etre rigoreux, discipliné et rangé tout au long de votre developpement.
 Avec Shamman, aucun projet n'est volumineux ou gros. Si vous suivez cette architecture, la taille du projet ne comptera plus.
+
+NB: et très important, les fichiers tels que les images, videos, documents, et autres ... ne doivent pas etre dans le dossier template, mais plutot dans le dossier 'stockage' à la racine du projet.

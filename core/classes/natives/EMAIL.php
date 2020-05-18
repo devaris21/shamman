@@ -12,7 +12,6 @@ use \registerPlugin;
 class EMAIL 
 {
 
-
 	public static function send(Array $destinateurs, String $subject, $lemessage, $format = false){
 		if (@fsockopen("www.google.com", 80)) {
 			// Create the Transport

@@ -10,8 +10,8 @@ class ROOTER extends PATH
 
     private $url;
     private $language = "fr";
-    public $section = "devaris21";
-    public $module = "start";
+    public $domaine = "devaris21";
+    public $section = "start";
     public $page = "select";
     public $id ;
 
@@ -19,9 +19,9 @@ class ROOTER extends PATH
     private $token;
 
 
-    const SECTION_SIMPLE = ["devaris21"];
-    const SECTION_ADMIN = ["gestion"];
-    const SECTION_STOCKAGE = ["images", "documents"];
+    const DOMAINE_SIMPLE = ["devaris21"];
+    const DOMAINE_ADMIN = ["gestion"];
+    const DOMAINE_STOCKAGE = ["images", "documents"];
 
 
     public function __construct(){
@@ -36,13 +36,13 @@ class ROOTER extends PATH
     private function createRoot(){
         if ($this->url != "") {
             $tab = explode("/", strtolower($this->url));
-            $this->section = $tab[0];
-            if (in_array($this->section, static::SECTION_ADMIN)) {
-                $this->module = "access";
+            $this->domaine = $tab[0];
+            if (in_array($this->domaine, static::DOMAINE_ADMIN)) {
+                $this->section = "access";
                 $this->page = "login";
             }
             if (isset($tab[1]) && $tab[1] != "") {
-                $this->module = $tab[1];
+                $this->section = $tab[1];
             }
 
             if (isset($tab[2]) && $tab[2] != "") {
@@ -61,9 +61,9 @@ class ROOTER extends PATH
     public function render(){
         $data = new RESPONSE;
         $data->status = true;
-        $this->is_admin = in_array($this->section, static::SECTION_ADMIN) ;
-        if ($this->is_admin && $this->module != "access") {
-            $data = PARAMS::checkTimeout($this->section);
+        $this->is_admin = in_array($this->domaine, static::DOMAINE_ADMIN) ;
+        if ($this->is_admin && $this->section != "access") {
+            $data = PARAMS::checkTimeout($this->domaine);
             if ($data->status == true) {
                 $params = PARAMS::findLastId();
                 $mycompte = MYCOMPTE::findLastId();
@@ -78,7 +78,7 @@ class ROOTER extends PATH
                     $productionjour->actualise();
                     session("lastUrl", $this->url);
 
-                    if ($this->section == "gestion") {
+                    if ($this->domaine == "gestion") {
                         $datas = EMPLOYE::findBy(["id = "=>getSession("employe_connecte_id")]);
                         if (count($datas) >0) {
                             $employe = $datas[0];
@@ -87,8 +87,8 @@ class ROOTER extends PATH
                                 foreach ($employe->fourni("role_employe") as $key => $value) {
                                     $tableauDeRoles[] = $value->role_id;
                                 };
-                                if (!in_array($this->module, ROLE::MODULEEXCEPT)) {
-                                    $datas = ROLE::findBy(["name ="=>$this->module]);
+                                if (!in_array($this->section, ROLE::sectionEXCEPT)) {
+                                    $datas = ROLE::findBy(["name ="=>$this->section]);
                                     if (count($datas) == 1) {
                                         $role = $datas[0];
                                         if (in_array($role->getId(), $tableauDeRoles)) {
@@ -111,7 +111,7 @@ class ROOTER extends PATH
                                 return false;
                             }
                         }else{
-                            $this->new_root($this->section, "access", "login");
+                            $this->new_root($this->domaine, "access", "login");
                             $this->render();
                             return false;
                         }
@@ -122,19 +122,19 @@ class ROOTER extends PATH
                     return false; 
                 }
             }else{
-                $this->new_root($this->section, "access", "login");
+                $this->new_root($this->domaine, "access", "login");
                 $this->render();
                 return false;
             }
         }
 
 
-        $path = __DIR__."/../../../webapp/$this->section/modules/$this->module/$this->page/index.php";
-        $require = __DIR__."/../../../webapp/$this->section/modules/$this->module/$this->page/require.php";
+        $path = __DIR__."/../../../webapp/$this->domaine/sections/$this->section/$this->page/index.php";
+        $require = __DIR__."/../../../webapp/$this->domaine/sections/$this->section/$this->page/require.php";
 
         if (file_exists($path)) {
-            $path = __DIR__."/../../../webapp/$this->section/modules/$this->module/$this->page/index.php";
-            $require = __DIR__."/../../../webapp/$this->section/modules/$this->module/$this->page/require.php";
+            $path = __DIR__."/../../../webapp/$this->domaine/sections/$this->section/$this->page/index.php";
+            $require = __DIR__."/../../../webapp/$this->domaine/sections/$this->section/$this->page/require.php";
 
             require realpath($require);
             require realpath($path);
@@ -144,8 +144,8 @@ class ROOTER extends PATH
             session("verif_token", $token);
 
         }else{
-            $path = __DIR__."/../../../webapp/devaris21/modules/home/erreur404/index.php";
-            $require = __DIR__."/../../../webapp/devaris21/modules/home/erreur404/require.php";
+            $path = __DIR__."/../../../webapp/devaris21/sections/home/erreur404/index.php";
+            $require = __DIR__."/../../../webapp/devaris21/sections/home/erreur404/require.php";
             require realpath($require);
             require realpath($path);
         }
@@ -155,9 +155,9 @@ class ROOTER extends PATH
 
 
     //redefinir la route
-    private function new_root($section, $module, $page="", $id=""){
+    private function new_root($domaine, $section, $page="", $id=""){
+        $this->domaine = $domaine;
         $this->section = $section;
-        $this->module = $module;
         $this->page   = $page;
         $this->id     = $id;
     }
@@ -165,8 +165,8 @@ class ROOTER extends PATH
 
 
 
-    public function url($section, $module, $page="", $id=""){
-        return $this->url = "../../$section/$module/$page|$id";
+    public function url($domaine, $section, $page="", $id=""){
+        return $this->url = "../../$domaine/$section/$page|$id";
     }
 
     public function setUrl(String $url){
@@ -179,14 +179,14 @@ class ROOTER extends PATH
     }
 
 
-    public function set_module($module)
+    public function set_section($section)
     {
-        $this->module = $module;
+        $this->section = $section;
         return $this;
     }
 
-    public function getModule(){
-        return $this->module;
+    public function getsection(){
+        return $this->section;
     }
 
     public function getPage(){
